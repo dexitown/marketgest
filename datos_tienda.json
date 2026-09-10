@@ -1,0 +1,15 @@
+{
+  "nombre": "Mi tienda",
+  "productos": [
+    {
+      "id": "bfc147e1-b240-4c88-a616-45b5a833df2d",
+      "nombre": "coca",
+      "precio": 2300.0,
+      "costo": 1200.0,
+      "stock": 4,
+      "categoria": "Gaseosa"
+    }
+  ],
+  "clientes": [],
+  "ventas": []
+}
