@@ -6,7 +6,7 @@
       "nombre": "coca",
       "precio": 2300.0,
       "costo": 1200.0,
-      "stock": 4,
+      "stock": 12,
       "categoria": "Gaseosa"
     },
     {
@@ -19,5 +19,21 @@
     }
   ],
   "clientes": [],
-  "ventas": []
+  "ventas": [
+    {
+      "id": "182d211d-cb8f-4092-a0e2-8acf345a15cd",
+      "fecha": "2026-09-11",
+      "cliente_id": null,
+      "cliente_nombre": null,
+      "detalles": [
+        {
+          "producto_id": "bfc147e1-b240-4c88-a616-45b5a833df2d",
+          "nombre_producto": "coca",
+          "cantidad": 2,
+          "precio_unitario": 2300.0
+        }
+      ],
+      "total": 4600.0
+    }
+  ]
 }
