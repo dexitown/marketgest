@@ -8,6 +8,14 @@
       "costo": 1200.0,
       "stock": 4,
       "categoria": "Gaseosa"
+    },
+    {
+      "id": "9b90d730-463c-4452-9e49-9b3fb28e6740",
+      "nombre": "limon",
+      "precio": 15.0,
+      "costo": 7.0,
+      "stock": 120,
+      "categoria": "Fruta/verdura"
     }
   ],
   "clientes": [],
