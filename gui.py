@@ -1,16 +1,9 @@
-"""
-gui.py
-------
-Interfaz gráfica con Tkinter. Esta capa SOLO muestra datos y captura
-interacción del usuario. Nunca calcula totales ni maneja stock
-directamente: siempre delega en Tienda o Reporte.
 
-Responsable sugerido: Persona 2.
-"""
-
+""
 import tkinter as tk
 from tkinter import ttk, messagebox
-
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from modelo import Tienda, Producto
 from reportes import Reporte
 from persistencia import guardar_tienda, cargar_tienda
@@ -35,16 +28,19 @@ class App(tk.Tk):
         self.tab_productos = ttk.Frame(notebook)
         self.tab_ventas = ttk.Frame(notebook)
         self.tab_reportes = ttk.Frame(notebook)
+        self.tab_graficas = ttk.Frame(notebook)
 
         notebook.add(self.tab_productos, text="Productos / Inventario")
         notebook.add(self.tab_ventas, text="Registrar venta")
         notebook.add(self.tab_reportes, text="Reportes")
+        notebook.add(self.tab_graficas, text="Gráficas")
 
         notebook.bind("<<NotebookTabChanged>>", self._on_tab_changed)
 
         self._armar_tab_productos()
         self._armar_tab_ventas()
         self._armar_tab_reportes()
+        self._armar_tab_graficas()
 
     def _on_tab_changed(self, event):
         tab_actual = event.widget.tab(event.widget.select(), "text")
@@ -54,6 +50,8 @@ class App(tk.Tk):
             self._refrescar_combo_productos()
         elif tab_actual == "Reportes":
             self._refrescar_reportes()
+        elif tab_actual == "Gráficas":
+            self._refrescar_graficas()
 
     # ---------------------------------------------------------------
     # TAB 1: Productos / Inventario
@@ -264,9 +262,6 @@ class App(tk.Tk):
         self.lista_bajo_stock = tk.Listbox(frame, width=50)
         self.lista_bajo_stock.pack(pady=5)
 
-        # TODO (Persona 2): sumar un gráfico con matplotlib embebido,
-        # por ejemplo ventas por día usando FigureCanvasTkAgg.
-
     def _refrescar_reportes(self):
         reporte = Reporte(self.tienda)
 
@@ -282,6 +277,46 @@ class App(tk.Tk):
         self.lista_bajo_stock.delete(0, tk.END)
         for producto in reporte.productos_bajo_stock():
             self.lista_bajo_stock.insert(tk.END, f"{producto.nombre}: quedan {producto.stock}")
+
+    # ---------------------------------------------------------------
+    # TAB 4: Gráficas
+    # ---------------------------------------------------------------
+    def _armar_tab_graficas(self):
+        frame = self.tab_graficas
+
+        self.fig_graficas = Figure(figsize=(6, 4), dpi=100)
+        self.ax_graficas = self.fig_graficas.add_subplot(111)
+
+        self.canvas_graficas = FigureCanvasTkAgg(self.fig_graficas, master=frame)
+        self.canvas_graficas.get_tk_widget().pack(fill="both", expand=True, padx=8, pady=8)
+
+        ttk.Button(frame, text="Actualizar gráfico", command=self._refrescar_graficas).pack(pady=6)
+
+        self._refrescar_graficas()
+
+    def _refrescar_graficas(self):
+        self.ax_graficas.clear()
+
+        ventas = self.tienda.listar_ventas()
+        if not ventas:
+            self.ax_graficas.set_title("Todavía no hay ventas registradas")
+            self.canvas_graficas.draw()
+            return
+
+        totales_por_fecha = {}
+        for venta in ventas:
+            totales_por_fecha[venta.fecha] = totales_por_fecha.get(venta.fecha, 0) + venta.total
+
+        fechas_ordenadas = sorted(totales_por_fecha.keys())
+        valores = [totales_por_fecha[f] for f in fechas_ordenadas]
+        etiquetas = [f.strftime("%d/%m") for f in fechas_ordenadas]
+
+        self.ax_graficas.bar(etiquetas, valores, color="#4C72B0")
+        self.ax_graficas.set_title("Ventas totales por día")
+        self.ax_graficas.set_ylabel("Total ($)")
+        self.fig_graficas.autofmt_xdate(rotation=45)
+
+        self.canvas_graficas.draw()
 
     # ---------------------------------------------------------------
     def _al_cerrar(self):
